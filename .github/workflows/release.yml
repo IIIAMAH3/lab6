@@ -1,4 +1,9 @@
 name: Release Automation
+
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   push:
     branches:
@@ -8,11 +13,26 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Create Release Tag
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          TAG_VERSION=$(date +'v%Y.%m.%d')
-          git tag $TAG_VERSION
-          git push origin $TAG_VERSION
+     - name: Checkout code
+       uses: actions/checkout@v3
+
+     - name: Set up Python
+       uses: actions/setup-python@v4
+       with:
+        python-version: '3.9'
+
+     - name: Install dependencies
+       run: |
+         pip install --upgrade setuptools wheel
+
+     - name: Generate release tag
+       id: versioning
+       run: |
+        VERSION=$(date +'%Y.%m.%d')
+        echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+
+     - name: Create GitHub release
+       uses: softprops/action-gh-release@v1
+       with:
+         tag_name: ${{ env.RELEASE_VERSION }}
+          generate_release_notes:true
