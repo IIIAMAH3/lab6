@@ -2,7 +2,7 @@ name: Release Automation
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   release:
